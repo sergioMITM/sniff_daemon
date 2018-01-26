@@ -19,6 +19,8 @@ from sniff_creds import get_creds, check_bruteforce
 # https://github.com/DanMcInerney/net-creds/blob/master/net-creds.py
 #########################
 
+args = None
+
 def parse_args():
    """Create the arguments"""
    parser = argparse.ArgumentParser()
@@ -41,12 +43,13 @@ def iface_finder():
         exit('[-] Could not find an internet active interface; please specify one with -i <interface>')
 
 def pkt_parser(pkt):
+    global args
     # Get rid of uninteresting packets
     if pkt.haslayer(Ether) and pkt.haslayer(Raw) and not pkt.haslayer(IP) and not pkt.haslayer(IPv6): return
     if pkt.haslayer(ARP): return
     #Get rid of all packets except requests from proxy users (to proxy and proxy port) 
-    if pkt.haslayer(IP) and str(pkt[IP].dst) != proxy_ip: return
-    if pkt.haslayer(TCP) and str(pkt[TCP].dport) != proxy_port: return
+    if pkt.haslayer(IP) and str(pkt[IP].dst) != args.proxy_ip: return
+    if pkt.haslayer(TCP) and str(pkt[TCP].dport) != args.proxy_port: return
 
     if pkt.haslayer(TCP) and pkt.haslayer(Raw) and pkt.haslayer(IP):
 	full_load = get_load(pkt)
@@ -54,6 +57,7 @@ def pkt_parser(pkt):
 	get_creds(body,headers,url,pkt)
 
 def main():
+    global args
     args = parse_args()
     # Read packets from either pcap or interface
     if args.pcap:

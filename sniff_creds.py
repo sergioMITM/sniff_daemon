@@ -23,16 +23,16 @@ def check_bruteforce():
 		continue
 	    if addr == i: count +=1
 	
-	#ban them and print it to the log
-	if count > 5: 
-	    subprocess.call('/usr/local/bin/ip_banner.sh %s' %i, shell=True)
-	    msg =  '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n'
-	    msg += "!\n"
-	    msg += "! Banned %s for %d password attempts in 5 minutes\n" %(i,count)
-	    msg += "!\n"
-	    with open(outfile,'a+') as f:
-		f.write(msg.encode('utf8'))
-	    print "! Banned %s for %d password attempts in 5 minutes" %(i,count)
+    #ban them and print it to the log
+    if count > 5: 
+	subprocess.call('/usr/local/bin/ip_banner.sh %s' %i, shell=True)
+	msg =  '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n'
+	msg += "!\n"
+	msg += "! Banned %s for %d password attempts in 5 minutes\n" %(i,count)
+	msg += "!\n"
+	with open(outfile,'a+') as f:
+	    f.write(msg.encode('utf8'))
+	print "! Banned %s for %d password attempts in 5 minutes" %(i,count)
     #reset the counters	
     ips = set()
     creds = set()
