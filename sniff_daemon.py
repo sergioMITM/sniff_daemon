@@ -13,6 +13,7 @@ import os
 from defrag import get_load
 from parse_http import get_body_url
 from sniff_creds import get_creds, check_bruteforce
+import time
  
 ##########################
 # built from net-creds.py
@@ -88,6 +89,7 @@ def main():
 	    #sniff for 5 minutes
             sniff(iface=conf.iface, prn=pkt_parser, filter="not src %s" % proxy_ip, store=0, timeout=300)
 	    check_bruteforce()
+	    time.sleep(600)
 	
 if __name__ == "__main__":
    main()

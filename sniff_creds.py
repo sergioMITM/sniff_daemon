@@ -22,17 +22,27 @@ def check_bruteforce():
 		print "bruteforce detection failed to split this value into 3 parts: ", c
 		continue
 	    if addr == i: count +=1
-	
-    #ban them and print it to the log
-    if count > 5: 
-	subprocess.call('/usr/local/bin/ip_banner.sh %s' %i, shell=True)
-	msg =  '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n'
-	msg += "!\n"
-	msg += "! Banned %s for %d password attempts in 5 minutes\n" %(i,count)
-	msg += "!\n"
-	with open(outfile,'a+') as f:
-	    f.write(msg.encode('utf8'))
-	print "! Banned %s for %d password attempts in 5 minutes" %(i,count)
+
+        if is_bot(src_ip):
+            subprocess.call('/usr/local/bin/ip_banner.sh %s' %src_ip, shell=True)
+            subprocess.call('/usr/local/bin/ip_banner.sh %s' %i, shell=True)
+            msg =  '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n'
+            msg += "!\n"
+            msg += "! Banned %s for not using a browser\n" %(i)
+            msg += "!\n"
+            with open(outfile,'a+') as f:
+                f.write(msg.encode('utf8'))
+            continue
+
+        #ban them and print it to the log
+        if count > 5: 
+            subprocess.call('/usr/local/bin/ip_banner.sh %s' %i, shell=True)
+            msg =  '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n'
+            msg += "!\n"
+            msg += "! Banned %s for %d password attempts in 5 minutes\n" %(i,count)
+            msg += "!\n"
+            with open(outfile,'a+') as f:
+                f.write(msg.encode('utf8'))
     #reset the counters	
     ips = set()
     creds = set()
@@ -64,6 +74,12 @@ def get_creds(body, headers, url, pkt):
     #only print out the ones with a valid url
     if len(url)!=0: cred_printer(http_user, http_pass, url, src_ip, cred_type)
 
+def is_bot(ip):
+    with open("/var/log/squid/access.log") as logfile:
+        for line in logfile:
+            if (line.find(ip)!=-1) and (line.find("text/javascript")!=-1): return False
+            if (line.find(ip)!=-1) and (line.find("text/css")!=-1): return False
+    return True
 
 def basic_auth(headers):
     '''
